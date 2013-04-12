@@ -12,22 +12,7 @@ chai.use(sinonChai)
 
 describe 'ResqueStats', ->
   it 'computes average queue length delta over the given window', (done) ->
-    poller = new EventEmitter
-    stats  = new ResqueStats(poller, 3 * 1000)
-
-    lastStats = null
-    stats.on 'data', (statistics) ->
-      lastStats = statistics
-
-    stats.on 'end', ->
-      lastStats.should.deep.eql
-        mailer:
-          currentLength: 6
-          averageDelta: -1
-        adder:
-          currentLength: 40
-          averageDelta: 10
-      done() # TEST PASS YAY
+    stats  = new ResqueStats(3 * 1000)
 
     time = moment()
     secondsAgo = (n) ->
@@ -41,5 +26,16 @@ describe 'ResqueStats', ->
       { timestamp: secondsAgo(0), lengths: { mailer: 6,  adder: 40 } }
     ]
 
-    poller.emit('data', data) for data in dataFromInfo
-    poller.emit('end')
+    events = 0
+    stats.on 'data', (statistics) ->
+      if ++events == dataFromInfo.length
+        statistics.should.deep.eql
+          mailer:
+            currentLength: 6
+            averageDelta: -1
+          adder:
+            currentLength: 40
+            averageDelta: 10
+        done()
+
+    stats.push(data.timestamp, data.lengths) for data in dataFromInfo

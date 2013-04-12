@@ -26,16 +26,12 @@ node-resque-stats works with [node-resque-info](https://github.com/BinaryMuse/no
 var info = require('resque-info');
 var stats = require('resque-stats');
 
-var resque = new info.ResqueEnvironment(...); // see docs for resque-info ??
-var poller = new stats.ResquePoller(resque, 500);
 var stats = new stats.ResqueStats(poller, 5 * 1000);
 stats.on('data', function(statistics) {
   console.log(statistics);
 });
+stats.push(date, lengths);
 ```
-
-`ResquePoller`
---------------
 
 `ResqueStats`
 -------------
